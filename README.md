@@ -84,6 +84,7 @@ Click the following links to view the methods. Notes:
   - [scNMT-seq](https://teichlab.github.io/scg_lib_structs/methods_html/scNMT-seq.html)
   - [scM&T-seq](https://teichlab.github.io/scg_lib_structs/methods_html/scMandT.html)
   - [Paired-Tag](methods_html/Paired-Tag.html)
+  - [Droplet Paired-Tag (10x Genomics)](methods_html/Droplet-Paired-Tag.html)
   - [Paired-seq](https://teichlab.github.io/scg_lib_structs/methods_html/Paired-seq.html)
   - [scCAT-seq](https://teichlab.github.io/scg_lib_structs/methods_html/scCAT-seq.html)
   - [scTrio-seq](https://teichlab.github.io/scg_lib_structs/methods_html/scTrio-seq.html)

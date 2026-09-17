@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Droplet Paired-Tag on 10x Genomics Next GEM Multiome: custom bridge adapter, DNA and RNA library construction, sequencing reads and paired barcode translation.">
+<link rel="stylesheet" type="text/css" href="../style_related/page_format.css">
+<title>Droplet Paired-Tag (10x Genomics)</title>
+<style>
+pre { overflow-x: auto; padding: 1em; background: #f7f7f7; line-height: 1.65; }
+pre seq { text-indent: 0; }
+.table-scroll { overflow-x: auto; }
+table { border-collapse: collapse; margin: 1em 0; }
+th, td { border: 1px solid #ddd; padding: .5em .75em; text-align: left; vertical-align: top; }
+.oligos { font-family: 'Fira Mono', monospace; font-size: .9em; overflow-wrap: anywhere; }
+nav a { display: inline-block; margin-right: 1em; }
+</style>
+</head>
+<body>
+<h1><a href="https://doi.org/10.1038/s41594-023-01060-1">Droplet Paired-Tag</a> (10x Genomics)</h1>
+<p><info>Droplet Paired-Tag profiles a targeted histone modification and gene expression from the same nucleus using antibody-directed pA-Tn5 tagmentation and the 10x Chromium Next GEM Single Cell Multiome platform. This page covers the 2023 Xie et al. protocol with Chromium X, Chip J and ARC-v1 chemistry.</info></p>
+<p>See <a href="Paired-Tag.html">original plate-based Paired-Tag</a> for split-pool barcoding, and <a href="10xChromium_multiome.html">10x Multiome</a> for the underlying commercial chemistry. Here, CUT&amp;Tag replaces the initial accessibility tagmentation; the DNA signal reports the antibody target. The H3K27ac and H3K27me3 experiments are separate assays, each paired with RNA.</p>
+<nav aria-label="Page sections"><a href="#oligos">Adapter sequences</a><a href="#assembly">Library generation</a><a href="#libraries">Final libraries</a><a href="#reads">Sequencing layout</a><a href="#barcodes">Barcode pairing</a><a href="#sources">Sources</a></nav>
+<h2 id="oligos">Adapter and primer sequences</h2>
+<p>All sequences are 5' to 3' unless an antiparallel strand is explicitly labelled. /5Phos/ denotes a 5' phosphate and /3ddC/ a 3' dideoxycytidine. The four custom oligos below are transcribed exactly from <a href="https://github.com/Xieeeee/Droplet-Paired-Tag/blob/d42c0fe0295bd5cb846aa19d1fd49bd0a80ea3a3/03.protocol/Supplementary_Table1_Oligo_Sequence.xls">Supplementary Table 1</a>; download them as <a href="../data/Droplet-Paired-Tag/oligos.csv">CSV</a>.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Custom oligo</th><th scope="col">Sequence (5' to 3')</th><th scope="col">Role</th></tr></thead><tbody>
+<tr><td>AdapterA</td><td class="oligos">/5Phos/TCGTCGGCAGCGTCAGATGTGTATAAGAGACAG</td><td>Transferred A-side adapter; its 5′ phosphate permits ligation to the bead capture oligo.</td></tr>
+<tr><td>AdapterB</td><td class="oligos">GTCTCGTGGGCTCGGAGATGTGTATAAGAGACAG</td><td>Transferred B-side adapter; provides the opposite DNA-library handle.</td></tr>
+<tr><td>pMENTs-Bridge</td><td class="oligos">/5Phos/CTGTCTCTTATACACATCTGACGCTGCCGACGACAGACGCG</td><td>Non-transferred strand with a 3′ extension that bridges AdapterA to the bead spacer. Also called bridge-pMENTs in the protocol.</td></tr>
+<tr><td>pMENTs</td><td class="oligos">/5Phos/CTGTCTCTTATACACATCT/3ddC/</td><td>Short non-transferred mosaic-end strand; 3′ blocked.</td></tr>
+</tbody></table></div>
+<p>The bridge oligo has <strong>no 3' ddC annotation</strong> in the source table, and AdapterB has no 5' phosphate annotation. Preserve those distinctions when reading the sequences.</p>
+<h3>Gel-bead oligos and commercial reagents</h3>
+<p>Each Multiome bead carries DNA-capture and RNA-capture oligos with paired, <strong>different</strong> 16-base barcode sequences. Below, BC-DNA and BC-RNA denote that pairing; they are not interchangeable literal sequences. Commercial primer mixes are shown by function rather than assigning undocumented full primer sequences.</p>
+<pre><seq>DNA capture oligo (schematic):
+5'- <p5>[P5]</p5><cbc>[16-base BC-DNA]</cbc><pe3>CGCGTCTG</pe3> -3'
+
+RNA capture / RT oligo (schematic):
+5'- <s5>[TruSeq R1 handle]</s5><cbc>[16-base BC-RNA]</cbc><umi>[12-base UMI]</umi>[poly(dT)VN] -3'
+
+AdapterA:
+5'- /5Phos/<s5>TCGTCGGCAGCGTC</s5><me>AGATGTGTATAAGAGACAG</me> -3'
+
+AdapterB:
+5'- <s7>GTCTCGTGGGCTCGG</s7><me>AGATGTGTATAAGAGACAG</me> -3'
+
+pMENTs-Bridge:
+5'- /5Phos/<me>CTGTCTCTTATACACATCT</me><s5>GACGCTGCCGACGA</s5><pe3>CAGACGCG</pe3> -3'</seq></pre>
+<p>Colour key: <cbc>cell barcode</cbc>, <umi>RNA UMI</umi>, <pe3>DNA capture spacer</pe3>, <me>Tn5 mosaic end</me>, <s5>A-side handle</s5> and <s7>B-side handle</s7>. Labels identify the segments independently of colour. N = any base and V = A/C/G.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Reagent in the published workflow</th><th scope="col">Function</th></tr></thead><tbody>
+<tr><td>Next GEM Single Cell Multiome ATAC + Gene Expression, PN-1000283; Chip J, PN-1000234</td><td>Paired bead barcodes, GEM generation, reverse transcription and DNA capture.</td></tr>
+<tr><td>Template Switch Oligo, PN-3000228; pre-amplification and cDNA primer mixes</td><td>Introduce the distal cDNA handle and amplify products after GEM recovery.</td></tr>
+<tr><td>Single Index Kit N Set A, PN-1000212</td><td>DNA library: 8-base i7 sample index. Each kit well contains a mixture of four index sequences.</td></tr>
+<tr><td>Dual Index Kit TT Set A, PN-1000215</td><td>RNA library: 10-base i7 and 10-base i5 sample indices.</td></tr>
+</tbody></table></div>
+<h2 id="assembly">Step-by-step library generation</h2>
+<h3>(1) Assemble the two pA-Tn5 adapter preparations</h3>
+<p>Anneal AdapterA with pMENTs-Bridge, and AdapterB with pMENTs. Load each annealed preparation into pA-Tn5, then mix equal volumes as specified in the <a href="https://github.com/Xieeeee/Droplet-Paired-Tag/blob/d42c0fe0295bd5cb846aa19d1fd49bd0a80ea3a3/03.protocol/Droplet_Paired-Tag_ProtocolExchange_230719.pdf">authors' protocol</a>. The extended bridge is the custom connection to the Multiome DNA-capture oligo.</p>
+<h3>(2) Perform antibody-directed tagmentation in nuclei</h3>
+<p>Pre-couple the histone-mark antibody with the assembled pA-Tn5, incubate with nuclei, wash and activate tagmentation. The transferred AdapterA and AdapterB strands provide the handles required for the subsequent DNA library. Cellular barcodes have not yet been attached.</p>
+<pre><seq>Productive A/B-ended DNA fragment (schematic, one strand):
+5'- <s5>[AdapterA handle]</s5><me>[ME]</me>[genomic insert]<me>[rc(ME)]</me><s7>[rc(AdapterB handle)]</s7> -3'</seq></pre>
+<p>This diagram follows an amplifiable A/B-ended fragment; it does not imply that every tagmentation product has this end combination. rc means reverse complement.</p>
+<h3>(3) Encapsulate nuclei with Multiome beads</h3>
+<p>Load tagmented nuclei with the barcoding mixture into Chip J on Chromium X. In each occupied GEM, the bead supplies DNA-capture oligos and barcoded oligo-dT primers. Droplet identity replaces the multiple split-pool barcode rounds of the original method.</p>
+<h3>(4) Attach a DNA barcode by bridge-assisted ligation</h3>
+<p>The bridge strand is reverse-complementary to the complete AdapterA plus the bead's terminal spacer. It aligns the 3' end of the capture oligo next to AdapterA's 5' phosphate. Ligation joins them without copying a UMI onto the DNA molecule.</p>
+<pre><seq>Antiparallel duplex (| = nick at the phosphorylated 5' end of AdapterA):
+
+5'- <p5>[P5]</p5><cbc>[BC-DNA]</cbc><pe3>CGCGTCTG</pe3> | <s5>TCGTCGGCAGCGTC</s5><me>AGATGTGTATAAGAGACAG</me>[genomic DNA] -3'
+            3'- <pe3>GCGCAGAC</pe3>   <s5>AGCAGCCGTCGCAG</s5><me>TCTACACATATTCTCTGTC</me> /5Phos/-5'
+                pMENTs-Bridge (3' to 5'; bases aligned above)
+
+After ligation, the barcode-bearing strand is:
+5'- <p5>[P5]</p5><cbc>[16-base BC-DNA]</cbc><pe3>CGCGTCTG</pe3><s5>TCGTCGGCAGCGTC</s5><me>AGATGTGTATAAGAGACAG</me>[genomic DNA] -3'</seq></pre>
+<p>The spacer is 8 bases long and is distinct from the 16-base cell barcode. The bridge is a ligation scaffold; it is not a second cellular barcode.</p>
+<h3>(5) Reverse-transcribe RNA and template-switch in the same GEM</h3>
+<p>The RNA capture oligo primes polyadenylated RNA. Reverse transcription incorporates BC-RNA and a 12-base UMI into cDNA; template switching supplies the distal amplification handle. The authors use a modified GEM incubation of 37 °C for 45 minutes, then 25 °C for 30 minutes, followed by quenching.</p>
+<pre><seq>RNA-derived first-strand cDNA (schematic):
+5'- <s5>[R1 handle]</s5><cbc>[16-base BC-RNA]</cbc><umi>[12-base UMI]</umi>[poly(dT)VN][cDNA]<tso>[template-switch-derived handle]</tso> -3'</seq></pre>
+<h3>(6) Recover, pre-amplify and split the products</h3>
+<p>Break the GEMs, clean up and pre-amplify using the Multiome workflow. The published modification elutes in 80 µl after pre-amplification cleanup, then uses 40 µl for DNA preparation and 17.5 µl plus 17.5 µl water for RNA preparation.</p>
+<h3>(7) Finish the DNA and RNA libraries separately</h3>
+<div class="table-scroll"><table><thead><tr><th scope="col">DNA / histone modification</th><th scope="col">RNA / gene expression</th></tr></thead><tbody>
+<tr><td>Use the Multiome ATAC library-construction branch on the barcoded CUT&amp;Tag fragments. Sample-index PCR supplies the P7 side and an 8-base i7 index.</td><td>Amplify cDNA, then fragment, end-repair/A-tail, ligate adapters and perform dual-index PCR using the Multiome gene-expression branch.</td></tr>
+<tr><td>Retain the existing P5-side cell barcode. There is <strong>no DNA UMI</strong> in this design.</td><td>Retain the R1-side cell barcode and UMI. Add 10-base i5 and i7 sample indices.</td></tr>
+</tbody></table></div>
+<h2 id="libraries">Final library structures</h2>
+<p>Both diagrams are oriented from P5 to P7, with the top strand written 5' to 3'. Bracketed handles and inserts are schematic. Sample indices identify libraries; the DNA cell barcode occupies the physical i5/Index 2 position.</p>
+<pre><seq>DNA library (CUT&amp;Tag; Multiome ATAC-compatible architecture):
+                                                            R1 →        ← R2
+5'- <p5>[P5]</p5><cbc>[BC-DNA:16]</cbc><pe3>CGCGTCTG</pe3><s5>TCGTCGGCAGCGTC</s5><me>AGATGTGTATAAGAGACAG</me>[genomic insert]<me>CTGTCTCTTATACACATCT</me><s7>CCGAGCCCACGAGAC</s7>[i7 rc:8]<p7>[P7 rc]</p7> -3'
+Index 2: ← across spacer and BC-DNA; Index 1: → across i7
+
+RNA library (dual-index gene expression):
+                               R1 →                                    ← R2
+5'- <p5>[P5]</p5>[i5:10]<s5>[TruSeq R1 site]</s5><cbc>[BC-RNA:16]</cbc><umi>[UMI:12]</umi>[poly(dT)VN][cDNA insert]<s7>[TruSeq R2 site]</s7>[i7 rc:10]<p7>[P7 rc]</p7> -3'
+Index 2: ← across i5; Index 1: → across i7</seq></pre>
+<p>The DNA Index 2 arrow illustrates the reverse-complement workflow used here; the instrument and demultiplexer determine how that index is represented in FASTQ. The DNA R1/R2 pair covers the biological fragment, whereas RNA R1 is the barcode/UMI read.</p>
+<h2 id="reads">Sequencing layout</h2>
+<p>The authors sequenced the two libraries in <strong>separate NextSeq 2000 runs</strong>. These are the published cycle settings, not universal requirements for every instrument. Download the <a href="../data/Droplet-Paired-Tag/read_structure.csv">read-coordinate table (CSV)</a>.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Library</th><th scope="col">R1</th><th scope="col">I1 (i7)</th><th scope="col">I2 (i5 position)</th><th scope="col">R2</th></tr></thead><tbody>
+<tr><td>DNA</td><td>100: genomic insert</td><td>8: sample index</td><td>24: 8-base spacer + 16-base cell barcode</td><td>100: opposite genomic end</td></tr>
+<tr><td>RNA</td><td>28: 16-base cell barcode + 12-base UMI</td><td>10: sample index</td><td>10: sample index</td><td>72: transcript sequence</td></tr>
+</tbody></table></div>
+<h3>DNA Index 2</h3>
+<pre><seq>Raw 24-cycle Index 2 in the reverse-complement workflow:
+Cycles:    1......8   9..............24
+Sequence: <pe3>CAGACGCG</pe3>  <cbc>[rc(BC-DNA), 16 bases]</cbc>
+           spacer      cell barcode</seq></pre>
+<p>Coordinates are 1-based, inclusive. The first 8 bases are the reverse complement of the bead spacer CGCGTCTG. Remove or mask the spacer before barcode correction. If conversion already removed the spacer or reverse-complemented the index read, do not apply those transformations again.</p>
+<p>The <a href="../data/10X-Genomics/CG000338_ChromiumNextGEM_Multiome_ATAC_GEX_User_Guide_RevF.pdf">10x guide (Rev F, pp. 69–71)</a> permits 24-cycle I2 on NextSeq 1000/2000 without a custom recipe. Instruments such as NextSeq 500/550 instead require the specified 8-dark-cycle + 16-read-cycle recipe. In that output, the 16 barcode bases need not have an 8-base FASTQ prefix.</p>
+<h3>RNA Read 1</h3>
+<pre><seq>Cycles:   1..............16  17.........28
+Sequence: <cbc>[BC-RNA, 16 bases]</cbc><umi>[UMI, 12 bases]</umi></seq></pre>
+<p>RNA I1 and I2 are sample indices, not cellular barcodes. Apply the instrument-appropriate i5 index orientation when demultiplexing. The original Paired-Tag Read 2 split-pool parser does not describe either of these droplet libraries.</p>
+<h2 id="barcodes">Match DNA and RNA from the same bead</h2>
+<p><a href="https://www.10xgenomics.com/support/software/cell-ranger-arc/latest/analysis/atac-barcoded-bam">10x documents a one-to-one pairing of different ATAC and GEX barcode sequences</a>. Match the DNA-side barcode to its RNA-side partner using the ARC-v1 translation map, after orientation normalization and error correction. A reverse complement alone is not the DNA-to-RNA barcode translation.</p>
+<p>The repository already contains the matching <a href="../data/10X-Genomics/atac_737K-arc-v1.txt.gz">DNA/ATAC whitelist</a> and <a href="../data/10X-Genomics/gex_737K-arc-v1.txt.gz">RNA/GEX whitelist</a>. All 736,320 row pairs were checked against the <a href="https://github.com/Xieeeee/Droplet-Paired-Tag/blob/d42c0fe0295bd5cb846aa19d1fd49bd0a80ea3a3/01.pre-process/supp/arc_bc-translation.txt">authors' full barcode translation table</a>. Preserve their order if deriving a map; do not sort the two lists independently.</p>
+<div class="table-scroll"><table><caption>Examples in the authors' translation-table orientation (not a universal raw-I2 orientation)</caption><thead><tr><th scope="col">DNA / ATAC</th><th scope="col">RNA / GEX partner</th></tr></thead><tbody>
+<tr><td class="oligos">ACAGCGGGTGTGTTAC</td><td class="oligos">AAACAGCCAAACAACA</td></tr>
+<tr><td class="oligos">ACAGCGGGTTGTTCTT</td><td class="oligos">AAACAGCCAAACATAG</td></tr>
+<tr><td class="oligos">ACAGCGGGTAACAGGC</td><td class="oligos">AAACAGCCAAACCCTA</td></tr>
+<tr><td class="oligos">ACAGCGGGTGCGCGAA</td><td class="oligos">AAACAGCCAAACCTAT</td></tr>
+</tbody></table></div>
+<p><a href="../data/Droplet-Paired-Tag/barcode_translation_examples.csv">Download these four examples</a>. Cell Ranger ARC's ATAC <code>CB</code> tag is already corrected and translated; its <code>CR</code> tag is the raw barcode. Avoid translating an already translated barcode. Keep GEM/sample identity when combining experiments.</p>
+<p>The authors' separate processing scripts use <code>--chemistry=ARC-v1</code> with Cell Ranger for RNA and Cell Ranger ATAC for DNA. The DNA branch uses fragment coordinates and cell barcode for duplicate handling; the RNA branch uses its UMI. CUT&amp;Tag peak calling and QC should reflect the histone target even though the library architecture follows Multiome ATAC.</p>
+<h2 id="sources">Sources and scope</h2>
+<ol>
+<li>Xie et al. (2023), <a href="https://doi.org/10.1038/s41594-023-01060-1">Droplet-based single-cell joint profiling of histone modifications and transcriptomes</a>, Nature Structural &amp; Molecular Biology 30, 1428–1433.</li>
+<li><a href="https://github.com/Xieeeee/Droplet-Paired-Tag/blob/d42c0fe0295bd5cb846aa19d1fd49bd0a80ea3a3/03.protocol/Supplementary_Table1_Oligo_Sequence.xls">Supplementary Table 1: four custom oligos</a>, and <a href="https://github.com/Xieeeee/Droplet-Paired-Tag/blob/d42c0fe0295bd5cb846aa19d1fd49bd0a80ea3a3/03.protocol/Droplet_Paired-Tag_ProtocolExchange_230719.pdf">authors' step-by-step protocol</a> (19 July 2023 file), especially transposome assembly and sections B–D.</li>
+<li><a href="../data/10X-Genomics/CG000338_ChromiumNextGEM_Multiome_ATAC_GEX_User_Guide_RevF.pdf">10x CG000338 Multiome User Guide, Rev F</a>, particularly library construction and pp. 69–71 for final structures and sequencing. Commercial segments are drawn schematically where full oligo sequences are not established by these sources.</li>
+<li><a href="https://github.com/Xieeeee/Droplet-Paired-Tag/blob/d42c0fe0295bd5cb846aa19d1fd49bd0a80ea3a3/01.pre-process/scripts/07.proc_10Xarc_RNA.sh">RNA processing script</a>, <a href="https://github.com/Xieeeee/Droplet-Paired-Tag/blob/d42c0fe0295bd5cb846aa19d1fd49bd0a80ea3a3/01.pre-process/scripts/08.proc_10Xarc_DNA.sh">DNA processing script</a>, and <a href="https://github.com/Xieeeee/Droplet-Paired-Tag/blob/d42c0fe0295bd5cb846aa19d1fd49bd0a80ea3a3/01.pre-process/supp/arc_bc-translation.txt">barcode translation map</a>, pinned at authors' repository revision <code>d42c0fe0295bd5cb846aa19d1fd49bd0a80ea3a3</code>.</li>
+<li><a href="https://www.10xgenomics.com/support/software/cell-ranger-arc/latest/analysis/atac-barcoded-bam">10x barcode translation and BAM-tag documentation</a>.</li>
+</ol>
+<p>The bridge duplex and read-coordinate diagrams are derived from the cited oligos and library architecture. This page describes the published Next GEM chemistry; it does not establish compatibility with later GEM-X kits. See <a href="../data/Droplet-Paired-Tag/README.md">sequence provenance and validation</a>.</p>
+</body>
+</html>

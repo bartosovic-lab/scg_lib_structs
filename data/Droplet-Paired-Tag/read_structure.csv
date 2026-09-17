@@ -1,0 +1,11 @@
+library,read,total_cycles,start_1based,end_1based,content,notes
+DNA,R1,100,1,100,genomic insert,Published NextSeq 2000 recipe
+DNA,I1,8,1,8,sample index i7,Single Index Kit N; not a cell barcode
+DNA,I2,24,1,8,spacer reverse complement,CAGACGCG; raw reverse-complement Index 2 workflow
+DNA,I2,24,9,24,16-base DNA cell barcode,Reverse complement of barcode on P5-bearing strand; normalize demultiplexer orientation before whitelist lookup
+DNA,R2,100,1,100,opposite end of genomic insert,No DNA UMI
+RNA,R1,28,1,16,RNA cell barcode,RNA-side ARC-v1 barcode
+RNA,R1,28,17,28,12-base UMI,RNA molecules only
+RNA,I1,10,1,10,sample index i7,Dual Index Kit TT
+RNA,I2,10,1,10,sample index i5,Dual Index Kit TT; not a cell barcode
+RNA,R2,72,1,72,transcript insert,Published recipe; use correct index orientation for the sequencer

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Original Paired-Tag library structure: oligos, split-pool barcoding, DNA and RNA library construction, and sequencing read layout.">
+<link rel="stylesheet" type="text/css" href="../style_related/page_format.css">
+<title>Paired-Tag</title>
+<style>
+pre { overflow-x: auto; padding: 1em; background: #f7f7f7; line-height: 1.65; }
+pre seq { text-indent: 0; }
+.table-scroll { overflow-x: auto; }
+table { border-collapse: collapse; margin: 1em 0; }
+th, td { border: 1px solid #ddd; padding: .5em .75em; text-align: left; vertical-align: top; }
+.oligos { font-family: 'Fira Mono', monospace; font-size: .9em; overflow-wrap: anywhere; }
+nav a { display: inline-block; margin-right: 1em; }
+</style>
+</head>
+<body>
+<h1><a href="https://doi.org/10.1038/s41592-021-01060-3">Paired-Tag</a></h1>
+<p><info>Paired-Tag combines antibody-directed protein A-Tn5 tagmentation with reverse transcription and split-pool barcoding to measure histone modifications and RNA in the same nuclei. This page describes the original 2021 plate-based chemistry (12 initial barcodes and two 96-well ligation rounds).</info></p>
+<p>Unlike <a href="Paired-seq.html">Paired-seq</a>, the initial DNA tagmentation is antibody-directed. The original design pairs one targeted histone modification with RNA per nucleus; the five histone marks in the publication were profiled in separate experiments. Later 384-well and droplet-based variants are outside this page's scope.</p>
+<nav aria-label="Page sections"><a href="#oligos">Adapter and primer sequences</a><a href="#assembly">Library generation</a><a href="#reads">Sequencing layout</a><a href="#sources">Sources</a></nav>
+<h2 id="oligos">Adapter and primer sequences</h2>
+<p>Sequences are written 5' to 3'. BC01 is the 4-base initial tube barcode; BC02 and BC03 are 7-base ligation-well barcodes. UMI means unique molecular identifier. N = any base, H = A/C/T, D = A/G/T, V = A/C/G; /5Phos/ denotes 5' phosphorylation, ddC a 3' dideoxycytidine, and * a phosphorothioate linkage.</p>
+<p>Colour key: <cbc>cellular barcode</cbc>, <umi>UMI</umi>, <me>Tn5 mosaic end</me>, <w1>NotI site</w1>, <t7>SbfI site</t7>, <s7>Read 2/P7-side handle</s7>. The labels also identify each segment without relying on colour.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Oligo / function</th><th scope="col">Sequence (5' to 3')</th></tr></thead><tbody>
+<tr><td>DNA_BC01 (12 oligos)</td><td class="oligos">/5Phos/<pe1>AGGCCAGAGCATTCG</pe1>A<cbc>[4-bp BC01]</cbc><w1>GCGGCCGC</w1><me>AGATGTGTATAAGAGACAG</me></td></tr>
+<tr><td>RNA_BC01, oligo-dT (12 oligos)</td><td class="oligos">/5Phos/<pe1>AGGCCAGAGCATTCG</pe1>T<cbc>[4-bp BC01]</cbc><t7>CCTGCAGG</t7>TTTTTTTTTTTTTTTTVN</td></tr>
+<tr><td>RNA_BC01, random hexamer (12 oligos)</td><td class="oligos">/5Phos/<pe1>AGGCCAGAGCATTCG</pe1>T<cbc>[4-bp BC01]</cbc><t7>CCTGCAGG</t7>NNNNNN</td></tr>
+<tr><td>BC02 / R02 (96 oligos)</td><td class="oligos">/5Phos/<r1>GTGCGAACTCAGACC</r1><cbc>[7-bp BC02]</cbc><r1>ATCCACGTGCTTGAG</r1></td></tr>
+<tr><td>BC03 / R04 (96 oligos)</td><td class="oligos"><s7>CAGACGTGTGCTCTTCCGATCT</s7><umi>[10-bp UMI]</umi><cbc>[7-bp BC03]</cbc>[0-3-bp phase block]<r3>GTGGCCGATGTTTCG</r3></td></tr>
+<tr><td>pMENTs</td><td class="oligos">5Phos/CTGTCTCTTATACACATCTddC</td></tr>
+<tr><td>AdaptorA</td><td class="oligos">TCGTCGGCAGCGTCAGATGTGTATAAGAGACAG</td></tr>
+<tr><td>Linker-R02</td><td class="oligos">CGAATGCTCTGGCCTCTCAAGCACGTGGAT</td></tr>
+<tr><td>Blocker-R02</td><td class="oligos">ATCCACGTGCTTGAGAGGCCAGAGCATTCG</td></tr>
+<tr><td>Linker-R03</td><td class="oligos">GGTCTGAGTTCGCACCGAAACATCGGCCAC</td></tr>
+<tr><td>Quencher-R03</td><td class="oligos">GTGGCCGATGTTTCGGTGCGAACTCAGACC</td></tr>
+<tr><td>Anchor-FokI-GH</td><td class="oligos">AAGCAGTGGTATCAACGCAGAGTGAAGGATGTGGGGGGGGG*H</td></tr>
+<tr><td>P5-FokI</td><td class="oligos">ACACTCTTTCCCTACACGACGCTCTTCCGATCT</td></tr>
+<tr><td>P5c-NNDC-FokI</td><td class="oligos">5Phos/NNDCAGATCGGAAGAGCGTCGTGTAGGGAAAGAGTG</td></tr>
+<tr><td>P5H-FokI</td><td class="oligos">ACACTCTTTCCCTACACGACGCTCTTCCGATCTH</td></tr>
+<tr><td>P5Hc-NNDC-FokI</td><td class="oligos">5Phos/NNDCDAGATCGGAAGAGCGTCGTGTAGGGAAAGAGTG</td></tr>
+<tr><td>PA-F</td><td class="oligos">CAGACGTGTGCTCTTCCGATCT</td></tr>
+<tr><td>PA-R</td><td class="oligos">AAGCAGTGGTATCAACGCAGAGT</td></tr>
+<tr><td>N5XX</td><td class="oligos">AATGATACGGCGACCACCGAGATCTACACNNNNNNNNTCGTCGGCAGCGTC</td></tr>
+<tr><td>P7XX</td><td class="oligos">CAAGCAGAAGACGGCATACGAGATNNNNNNGTGACTGGAGTTCAGACGTGTGCTCTTCCGATC</td></tr>
+<tr><td>P5 Universal</td><td class="oligos">AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATC*T</td></tr>
+</tbody></table></div>
+<p>The supplementary table calls the third barcode plate <strong>BC Plate #03</strong>, but its oligos are named <strong>R04_#01–R04_#96</strong>. These are the second ligation round, not an extra round. The protocol calls this plate R03. The phase block follows BC03 and has 0, 1, 2 or 3 random bases, depending on the well.</p>
+<p>Download <a href="../data/Paired-Tag/oligos.csv">all published oligos (CSV)</a> or <a href="../data/Paired-Tag/barcodes.csv">barcode sequences and phase-block lengths (CSV)</a>. These are extracted from <a href="https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41592-021-01060-3/MediaObjects/41592_2021_1060_MOESM3_ESM.xlsx">Supplementary Table 1</a>; index placeholders in N5XX and P7XX must be replaced with chosen sample indices, not random bases.</p>
+<h2 id="assembly">Step-by-step library generation</h2>
+<p>Diagrams show the barcode-bearing strand in its 5' to 3' direction. Bracketed segments are schematic, not literal DNA; lengths are not to scale. The complementary strand is omitted until the final library overview.</p>
+<h3>(1) Anneal adapters and prepare barcoded nuclei reactions</h3>
+<p>Anneal each DNA_BC01 oligo with pMENTs and load protein A-Tn5. Prepare matched oligo-dT and random-hexamer RT primers for each of the 12 initial tubes. Separately anneal BC02 with Linker-R02, and BC03 (R04) with Linker-R03. The linkers bridge the ligation junctions.</p>
+<pre><seq>First ligation oligo (BC02):
+
+5'- <r1>GTGCGAACTCAGACC</r1><cbc>[7-bp BC02]</cbc><r1>ATCCACGTGCTTGAG</r1> -3'</seq></pre>
+<pre><seq>Second ligation oligo (BC03):
+
+5'- <s7>CAGACGTGTGCTCTTCCGATCT</s7><umi>[10-bp UMI]</umi><cbc>[7-bp BC03]</cbc>[0-3-bp phase block]<r3>GTGGCCGATGTTTCG</r3> -3'</seq></pre>
+<h3>(2) Antibody-directed tagmentation adds BC01 to genomic DNA</h3>
+<p>Incubate nuclei with the histone-mark antibody, bind barcoded protein A-Tn5 and activate tagmentation. Each transferred adapter contains the common ligation handle, a DNA-specific A, BC01, a NotI site and the Tn5 mosaic end. Only one tagged end is drawn.</p>
+<pre><seq>DNA after targeted tagmentation:
+
+5'- <pe1>AGGCCAGAGCATTCG</pe1>A<cbc>[4-bp BC01]</cbc><w1>GCGGCCGC</w1><me>AGATGTGTATAAGAGACAG</me>[genomic DNA] -3'</seq></pre>
+<h3>(3) Reverse transcription adds the matching BC01 to cDNA</h3>
+<p>Reverse-transcribe RNA inside the same nuclei using the matched barcoded RT primer mix. Both primer types carry a common handle, an RNA-specific T, the same BC01 and an SbfI site. The random hexamers are priming bases, not the UMI.</p>
+<pre><seq>RNA-derived first-strand cDNA:
+
+5'- <pe1>AGGCCAGAGCATTCG</pe1>T<cbc>[4-bp BC01]</cbc><t7>CCTGCAGG</t7>[T16VN or N6][cDNA] -3'</seq></pre>
+<h3>(4) Pool and split nuclei into 96 wells: first ligation (BC02)</h3>
+<p>Ligate the pre-annealed BC02 adapters to the 5' ends of both DNA and cDNA. Block unused first-round linkers with Blocker-R02, then pool and wash the nuclei.</p>
+<pre><seq>DNA:
+
+5'- <r1>GTGCGAACTCAGACC</r1><cbc>[7-bp BC02]</cbc><r1>ATCCACGTGCTTGAG</r1><pe1>AGGCCAGAGCATTCG</pe1>A<cbc>[4-bp BC01]</cbc><w1>GCGGCCGC</w1><me>AGATGTGTATAAGAGACAG</me>[genomic DNA] -3'</seq></pre>
+<pre><seq>cDNA:
+
+5'- <r1>GTGCGAACTCAGACC</r1><cbc>[7-bp BC02]</cbc><r1>ATCCACGTGCTTGAG</r1><pe1>AGGCCAGAGCATTCG</pe1>T<cbc>[4-bp BC01]</cbc><t7>CCTGCAGG</t7>[T16VN or N6][cDNA] -3'</seq></pre>
+<h3>(5) Split into 96 wells again: second ligation (BC03 and UMI)</h3>
+<p>Ligate BC03 adapters, adding the Read 2-side handle, a 10-base UMI, BC03 and the phase block to both modalities. Quench with Quencher-R03 and EDTA, pool and wash. The original barcode space is 12 × 96 × 96 = 110,592 combinations before subdivision into sublibraries; this is not a collision-free cell capacity.</p>
+<pre><seq>DNA:
+
+5'- <s7>CAGACGTGTGCTCTTCCGATCT</s7><umi>[10-bp UMI]</umi><cbc>[7-bp BC03]</cbc>[0-3-bp phase block]<r3>GTGGCCGATGTTTCG</r3><r1>GTGCGAACTCAGACC</r1><cbc>[7-bp BC02]</cbc><r1>ATCCACGTGCTTGAG</r1><pe1>AGGCCAGAGCATTCG</pe1>A<cbc>[4-bp BC01]</cbc><w1>GCGGCCGC</w1><me>AGATGTGTATAAGAGACAG</me>[genomic DNA] -3'</seq></pre>
+<pre><seq>cDNA:
+
+5'- <s7>CAGACGTGTGCTCTTCCGATCT</s7><umi>[10-bp UMI]</umi><cbc>[7-bp BC03]</cbc>[0-3-bp phase block]<r3>GTGGCCGATGTTTCG</r3><r1>GTGCGAACTCAGACC</r1><cbc>[7-bp BC02]</cbc><r1>ATCCACGTGCTTGAG</r1><pe1>AGGCCAGAGCATTCG</pe1>T<cbc>[4-bp BC01]</cbc><t7>CCTGCAGG</t7>[T16VN or N6][cDNA] -3'</seq></pre>
+<h3>(6) Divide nuclei into sublibraries, lyse, C-tail and pre-amplify</h3>
+<p>Divide the barcoded nuclei into sublibraries before lysis. Denature recovered nucleic acids, then use terminal deoxynucleotidyl transferase (TdT) and dCTP to add 3' poly(C) tails. Anchor-FokI-GH primes second-strand synthesis from these tails and introduces the FokI-containing anchor. PA-F and PA-R then amplify the barcoded products.</p>
+<pre><seq>Tailed strand, either modality:
+
+5'- <s7>CAGACGTGTGCTCTTCCGATCT</s7><umi>[10-bp UMI]</umi><cbc>[7-bp BC03]</cbc>[0-3-bp phase block]<r3>GTGGCCGATGTTTCG</r3><r1>GTGCGAACTCAGACC</r1><cbc>[7-bp BC02]</cbc><r1>ATCCACGTGCTTGAG</r1>[BC01 adapter][DNA or cDNA insert]<tso>CCCC…CCCC</tso> -3'</seq></pre>
+<pre><seq>Anchor-FokI-GH (anneals antiparallel to the C-tail):
+
+5'- <tso>AAGCAGTGGTATCAACGCAGAGTGAAGGATGTGGGGGGGGG*H</tso> -3'</seq></pre>
+<h3>(7) Split the amplified material into DNA and RNA library preparations</h3>
+<div class="table-scroll"><table><thead><tr><th scope="col">DNA library</th><th scope="col">RNA library</th></tr></thead><tbody>
+<tr><td>SbfI cuts the RNA-specific adapter, disrupting barcode-to-cDNA linkage in unwanted RNA-derived products. FokI removes the distal anchor and creates an end for adapter ligation.</td><td>NotI cuts the DNA-specific adapter, disrupting barcode-to-insert linkage in unwanted genomic DNA products.</td></tr>
+<tr><td>Ligate the annealed P5/P5H adapter mix (1:3). The P5H adapter adds a diversity base near the Read 1 start.</td><td>Tagment the amplified cDNA with Tn5 loaded with AdaptorA/pMENTs, introducing the Nextera Read 1 side. Retain fragments connecting this new end to the cell-barcode end.</td></tr>
+<tr><td>Index PCR: <strong>P5 Universal + P7XX</strong>. The original DNA library is single-indexed (i7).</td><td>Index PCR: <strong>N5XX + P7XX</strong>. The RNA molecule contains i5 and i7 indices; the published sequencing recipe reads i7.</td></tr>
+</tbody></table></div>
+<p>The digestion selects which modality retains an amplifiable barcode-to-insert connection. It does not remove the cellular barcodes from the desired library.</p>
+<h3>(8) Final library configuration</h3>
+<p>Here the top strand is oriented from P5 to P7. “rc” indicates the reverse complement of the segment as listed above. Read 1 enters the biological insert from the P5 side; Read 2 starts with the UMI from the P7 side.</p>
+<pre><seq>DNA library (schematic):
+                     Read 1 →                                                   ← Read 2
+5'- <p5>P5</p5>—<s5>TruSeq R1 site</s5>—[junction / genomic insert]—rc(<me>ME</me>)—rc(<w1>NotI</w1>)—rc(<cbc>BC01</cbc>)—T—rc(handle)—…—rc(<cbc>BC02</cbc>)—…—rc(PB)—rc(<cbc>BC03</cbc>)—rc(<umi>UMI</umi>)—<s7>R2 site</s7>—[i7 rc]—<p7>P7 rc</p7> -3'
+3'-                                      complementary strand                                                                                           -5'
+
+RNA library (schematic):
+                            Read 1 →                                                     ← Read 2
+5'- <p5>P5</p5>—[i5]—<s5>Nextera R1 site</s5>—[cDNA insert / RT priming bases]—rc(<t7>SbfI</t7>)—rc(<cbc>BC01</cbc>)—A—rc(handle)—…—rc(<cbc>BC02</cbc>)—…—rc(PB)—rc(<cbc>BC03</cbc>)—rc(<umi>UMI</umi>)—<s7>R2 site</s7>—[i7 rc]—<p7>P7 rc</p7> -3'
+3'-                                      complementary strand                                                                                                      -5'</seq></pre>
+<p>PB = phase block. Each rc(segment) is the reverse complement of that individual segment. Ellipses on the barcode side omit the constant ligation sequences shown in steps 4–5; this overview is not a base-by-base duplex alignment.</p>
+<h2 id="reads">Sequencing layout</h2>
+<p>The authors' protocol specifies at least <strong>50 cycles for Read 1 and 100 cycles for Read 2</strong>, using standard Illumina sequencing primers. Its example is R1 50 + I1 7 + R2 100. Supplementary Table 1 encodes a 6-base i7 in P7XX, whereas the protocol example allocates 7 index cycles; choose the index mask to match the actual ordered primers and sample sheet.</p>
+<h3>Read 2: identical barcode layout for DNA and RNA</h3>
+<pre><seq>Read 2 sequence (as observed in FASTQ):
+
+5'- <umi>[10-bp UMI]</umi><cbc>[7-bp BC03]</cbc>[0-3-bp phase block]<r3>GTGGCCGATGTTTCG</r3><r1>GTGCGAACTCAGACC</r1><cbc>[7-bp BC02]</cbc><r1>ATCCACGTGCTTGAG</r1><pe1>AGGCCAGAGCATTCG</pe1>[A for DNA / T for RNA]<cbc>[4-bp BC01]</cbc>[NotI for DNA / SbfI for RNA]… -3'</seq></pre>
+<p>Coordinates below are <strong>1-based and inclusive</strong>. Let p be the phase-block length (0–3). The UMI and BC03 positions stay fixed; downstream positions shift by p.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Read 2 cycles</th><th scope="col">Length</th><th scope="col">Element / sequence</th></tr></thead><tbody>
+<tr><td>1–10</td><td>10</td><td>UMI</td></tr>
+<tr><td>11–17</td><td>7</td><td>BC03 (second ligation)</td></tr>
+<tr><td>18–(17+p), absent if p=0</td><td>0–3</td><td>Phase block</td></tr>
+<tr><td>(18+p)–(47+p)</td><td>30</td><td class="oligos">GTGGCCGATGTTTCGGTGCGAACTCAGACC</td></tr>
+<tr><td>(48+p)–(54+p)</td><td>7</td><td>BC02 (first ligation)</td></tr>
+<tr><td>(55+p)–(84+p)</td><td>30</td><td class="oligos">ATCCACGTGCTTGAGAGGCCAGAGCATTCG</td></tr>
+<tr><td>85+p</td><td>1</td><td>A for DNA; T for RNA</td></tr>
+<tr><td>(86+p)–(89+p)</td><td>4</td><td>BC01 (initial tube)</td></tr>
+<tr><td>(90+p)–(97+p)</td><td>8</td><td class="oligos">DNA: GCGGCCGC (NotI); RNA: CCTGCAGG (SbfI)</td></tr>
+</tbody></table></div>
+<p>Read 1 supplies genomic or transcript sequence for alignment. Read 2 is primarily a barcode read, so this is not a conventional paired-end genomic-fragment layout. Barcode sequences in the CSV are already in Read 2 orientation.</p>
+<p>Use linker-aware extraction rather than one fixed set of offsets for all wells. The authors' <code>reachtools combine2</code> handles the original 7-base ligation barcodes; <code>combine3</code> is for the later 8-base design. The cell key must include <strong>sublibrary + BC03 + BC02 + BC01</strong>, with matched sublibrary labels for DNA and RNA. Keep the UMI separate from cell identity.</p>
+<p>I1 reads the reverse complement of the i7 sequence in P7XX. If collecting I2 from the RNA library, account for the instrument-dependent i5 orientation described in the <a href="Illumina.html">Illumina overview</a>; the original DNA library has no i5 index.</p>
+<h2 id="sources">Sources and scope</h2>
+<ol>
+<li>Zhu et al. (2021), <a href="https://doi.org/10.1038/s41592-021-01060-3">Joint profiling of histone modifications and transcriptome in single cells from mouse brain</a>, Nature Methods 18, 283–292.</li>
+<li><a href="https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41592-021-01060-3/MediaObjects/41592_2021_1060_MOESM3_ESM.xlsx">Supplementary Table 1: primer and barcode sequences</a>. All downloadable oligos and barcodes come from this table.</li>
+<li><a href="https://github.com/cxzhu/Paired-Tag/blob/b2f367391aba77b17c833cb5671058ee397a19af/protocol/Protocol_Github.pdf">Authors' protocol, updated 4 May 2021</a>, especially sections B-4, B-5 and C-1–C-3; <a href="https://github.com/cxzhu/Paired-Tag/blob/b2f367391aba77b17c833cb5671058ee397a19af/protocol/readme.md">protocol FAQs</a>.</li>
+<li><a href="https://github.com/cxzhu/Paired-Tag/blob/b2f367391aba77b17c833cb5671058ee397a19af/reachtools/reachtools.h">Authors' barcode extraction implementation</a> (<code>read2_2r::trim</code>) and <a href="https://github.com/cxzhu/Paired-Tag/blob/b2f367391aba77b17c833cb5671058ee397a19af/README.md">analysis guide</a>. Source revision: <code>b2f367391aba77b17c833cb5671058ee397a19af</code>.</li>
+</ol>
+<p>The assembly and read-coordinate diagrams are derived from these oligos and checked against the extraction code. See <a href="../data/Paired-Tag/README.md">data provenance and conventions</a>. The diagrams describe sequence architecture; consult the original protocol for experimental conditions.</p>
+</body>
+</html>

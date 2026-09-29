@@ -1,0 +1,9 @@
+read,total_cycles,start_1based,end_1based,content,orientation_in_raw_fastq
+R1,79,1,79,genomic insert (s5 side),
+I1,43,1,8,Tn5 s7 barcode,reverse complement of barcode in P7_s7 oligo
+I1,43,9,35,fixed s7 sequence GGACAGGGACAGCCGAGCCCACGAGAC,
+I1,43,36,43,ICELL8 i7 index,reverse complement of barcode in sci_Ad2 oligo
+I2,37,1,8,Tn5 s5 barcode,reverse complement of barcode in P5_s5 oligo (reverse-complement workflow e.g. NextSeq 1000/2000)
+I2,37,9,29,fixed s5 sequence GCGTGGAGACGCTGCCGACGA,
+I2,37,30,37,ICELL8 i5 index,reverse complement of barcode in sci_Ad1 oligo (reverse-complement workflow)
+R2,79,1,79,genomic insert (s7 side),

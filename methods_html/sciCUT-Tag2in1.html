@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="../style_related/page_format.css">
+<title>sciCUT&amp;Tag/sciCUT&amp;Tag2in1</title>
+<style>
+table { border-collapse: collapse; margin: 1em 0; }
+th, td { border: 1px solid #ddd; padding: .4em .7em; text-align: left; vertical-align: top; }
+</style>
+</head>
+<body>
+
+<h1><a href="#sciCUT-Tag" target="_self">sciCUT&amp;Tag</a>
+        / <a href="#sciCUT-Tag2in1" target="_self">sciCUT&amp;Tag2in1</a></h1>
+
+<br>
+
+<h1><span style="color:red"><a href="https://doi.org/10.1016/j.celrep.2025.116802" name="sciCUT-Tag2in1" target="_blank">sciCUT&amp;Tag2in1</a></span></h1>
+
+<p><info>sciCUT&amp;Tag2in1 (<a href="https://doi.org/10.1016/j.celrep.2025.116802" target="_blank">Janssens <i>et al.</i>, 2025, <i>Cell Reports</i></a>) jointly profiles RNA Polymerase II and a histone modification in the same single cell. It is built on sciCUT&amp;Tag (<a href="https://doi.org/10.1038/s41596-023-00905-9" name="sciCUT-Tag" target="_blank">Janssens <i>et al.</i>, 2024, <i>Nature Protocols</i></a>), which uses protein A-Tn5 (pA-Tn5) loaded with barcoded adapters instead of free Tn5. Cells are tagmented in 96 wells, each with a different pair of Tn5 barcodes. The cells are then pooled and dispensed into the 72 &times; 72 = 5,184 nanowells of a TaKaRa ICELL8 chip, where PCR adds a second barcode pair (i5/i7). A cell is identified by the combination of the Tn5 barcodes and the ICELL8 i5/i7 indices. In the 2in1 version the cells are tagmented twice in the same well: first for Pol II with sci-pA-Tn5 plate 1, then for the histone mark with sci-pA-Tn5 plate 2. The two plates carry different Tn5 barcodes. The sequences here are taken from <a href="../data/sciCUT-Tag2in1/NIHMS2137280-supplement-Supplementary_Table_1.xlsx" target="_blank">Supplementary Table 1</a> of the <i>Cell Reports</i> paper, which also covers sciCUT&amp;Tag (plate 1 alone).</info></p>
+
+<br>
+
+<h2>Is this the same library structure as sci-ATAC-seq?</h2>
+<p>The <b>final library structure is the same as <a href="sci-ATAC-seq_family.html#sci-ATAC-seq">sci-ATAC-seq</a></b>, with the same Tn5 adapter backbone from <a href="https://www.nature.com/articles/ng.3119" target="_blank">Amini <i>et al.</i>, 2014</a>. The differences are in the barcodes, the PCR indices, the sequencing primers and the way the cells are split:</p>
+<table>
+<tr><th></th><th>sci-ATAC-seq</th><th>sciCUT&amp;Tag / sciCUT&amp;Tag2in1</th></tr>
+<tr><td>Tn5 adapters (s5/s7 + 8-bp Tn5 barcode + ME)</td><td>Amini 2014 design</td><td>Identical backbone. Plate 1 uses the 8 s5 &times; 12 s7 Amini barcodes, except that s5_4 is <seq>TTCTCGTA</seq> here and <seq>GGCTCTGA</seq> in Amini. Plate 2 (2in1 only) uses 8 + 12 new barcodes.</td></tr>
+<tr><td>Transposase</td><td>Tn5, which inserts into accessible chromatin</td><td>pA-Tn5, targeted by antibodies. Pol II uses CUTAC (low salt) conditions, histone marks use CUT&amp;Tag (300 mM NaCl) conditions.</td></tr>
+<tr><td>Second barcode (pool and split)</td><td>Sort nuclei into a PCR plate; indexed PCR per well</td><td>Dispense into 5,184 ICELL8 nanowells; indexed PCR on the chip</td></tr>
+<tr><td>PCR i5 / i7 index length</td><td>10 bp</td><td><b>8 bp</b> (72 i5 <seq>sci_Ad1.x</seq> and 72 i7 <seq>sci_Ad2.x</seq>, adapted from Buenrostro <i>et al.</i>, 2015)</td></tr>
+<tr><td>Custom sequencing primers</td><td>Extended ME primers (34 nt)</td><td>Shorter primers that bind the same sites (20 to 30 nt; each is a 3' substring of the matching sci-ATAC primer)</td></tr>
+<tr><td>Index 1 / Index 2 cycles</td><td>45 / 39 (8 + 27 + 10 / 8 + 21 + 10)</td><td><b>43 / 37</b> (8 + 27 + 8 / 8 + 21 + 8)</td></tr>
+</table>
+<p>A sci-ATAC-seq read parser can therefore be reused if it is set to 8-bp PCR indices and the barcode whitelists below.</p>
+
+<br>
+
+<h2>Adapter and primer sequences:</h2>
+<seq>
+<p>Barcoded Tn5 sequence s5 (<seq>P5_s5_1..8</seq> plate 1; <seq>P5_s5_9..16</seq> plate 2): 5'- <s5>TCGTCGGCAGCGTCTCCACGC</s5><cbc>[8-bp Tn5 s5 barcode]</cbc>GCGATCGAGGACGGC<me>AGATGTGTATAAGAGACAG</me> -3'</p>
+<p>Barcoded Tn5 sequence s7 (<seq>P7_s7_1..12</seq> plate 1; <seq>P7_s7_13..24</seq> plate 2): 5'- <s7>GTCTCGTGGGCTCGGCTGTCCCTGTCC</s7><cbc>[8-bp Tn5 s7 barcode]</cbc>CACCGTCTCCGCCTC<me>AGATGTGTATAAGAGACAG</me> -3'</p>
+<p>Tn5MErev (Tn5 binding site 19-bp Mosaic End (ME) bottom): 5'- /Phos/<me>CTGTCTCTTATACACATCT</me> -3'</p>
+<p>sci_Ad1.1..72 (ICELL8 i5 PCR primer): 5'- <p5>AATGATACGGCGACCACCGAGATCTACAC</p5>[8-bp i5]<s5>TCGTCGGCAGCGTCTCCACGC</s5> -3'</p>
+<p>sci_Ad2.1..72 (ICELL8 i7 PCR primer): 5'- <p7>CAAGCAGAAGACGGCATACGAGAT</p7>[8-bp i7]<s7>GTCTCGTGGGCTCGGCTGTCCCTGTCC</s7> -3'</p>
+<p>NextSeq_Read1_seq_primer: 5'- GAGGACGGC<me>AGATGTGTATAAGAGACAG</me> -3'</p>
+<p>NextSeq_Index1_seq_primer: 5'- <me>CATCT</me>GAGGCGGAGACGGTG -3'</p>
+<p>NextSeq_Index2_seq_primer: 5'- <me>CATCT</me>GCCGTCCTCGATCGC -3'</p>
+<p>NextSeq_Read2_seq_primer: 5'- GTCTCCGCCTC<me>AGATGTGTATAAGAGACAG</me> -3'</p>
+</seq>
+<p>All oligos with their extracted barcodes are in <a href="../data/sciCUT-Tag2in1/oligos.csv">oligos.csv</a>. Note that in the source table <seq>sci_Ad2.60</seq> and <seq>sci_Ad2.61</seq> have the same sequence (<seq>GACCGTTT</seq>), and only 71 of the 72 i7 primers are listed (there is no <seq>sci_Ad2.72</seq>). Check your own primer plate before building an i7 whitelist.</p>
+
+<br>
+
+<h2>Step-by-step library generation</h2>
+<h3>(1) Anneal barcoded Tn5 sequences s5/s7 to Tn5MErev and load pA-Tn5. Each of the 96 wells of a sci-pA-Tn5 plate gets a unique s5 &times; s7 pair (8 &times; 12). Plate 1 uses s5_1..8 &times; s7_1..12 (Pol II). Plate 2 uses s5_9..16 &times; s7_13..24 (histone mark, barcodes 97-192):</h3>
+<img src="../data/sci-ATAC-seq_family/sci-ATAC-seq_Tn5.svg" alt="Tn5 dimer" style="width:800px;height:450px;">
+<p>The transposome is the same as in sci-ATAC-seq, apart from being fused to protein A.</p>
+
+<h3>(2) Bind lightly fixed whole cells to ConA beads, incubate with Pol II antibodies (Ser5P, Ser2P, Ser2/5P) and guinea pig anti-rabbit secondary, split into 96 wells, and tagment with sci-pA-Tn5 plate 1 under CUTAC conditions:</h3>
+<p>This gives the same three product types as sci-ATAC-seq: s5/s5, s7/s7 and s5/s7. Only s5/s7 fragments are amplified efficiently (<a href="http://www.nature.com/nmeth/journal/v7/n7/full/nmeth.1470.html" target="_blank">semi-suppressive PCR</a>). Here is the amplifiable product:</p>
+<pre>
+<seq>
+5'- <s5>TCGTCGGCAGCGTCTCCACGC</s5><cbc>[8-bp s5 barcode]</cbc>GCGATCGAGGACGGC<me>AGATGTGTATAAGAGACAG</me>XXXXXXXXXXXX...XXX         <me>CTGTCTCTTATACACATCT</me>
+                                                  <me>TCTACACATATTCTCTGTC</me>         XXX...XXXXXXXXXXXX<me>GACAGAGAATATGTGTAGA</me>CTCCGCCTCTGCCAC<cbc>[8-bp s7 barcode]</cbc><s7>CCTGTCCCTGTCGGCTCGGGTGCTCTG</s7> -5'
+</seq>
+</pre>
+
+<h3>(3) In the same wells, block with rabbit Fc peptide, incubate with the histone antibody (H3K4me1-2-3 mix in 48 wells, H3K27me3 in 48 wells) and secondary, and tagment again with sci-pA-Tn5 plate 2 under CUT&amp;Tag conditions:</h3>
+<p>The second round produces fragments with the same structure, but with plate-2 barcodes. Because each cell stays in the same well, well <i>k</i> of plate 1 and well <i>k</i> of plate 2 mark the same cells. Fragments are grouped by where their two Tn5 barcodes come from:</p>
+<table>
+<tr><th>s5 barcode</th><th>s7 barcode</th><th>Assigned to</th></tr>
+<tr><td>plate 1 (s5_1..8)</td><td>plate 1 (s7_1..12)</td><td>Pol II (CUTAC)</td></tr>
+<tr><td>plate 2 (s5_9..16)</td><td>plate 2 (s7_13..24)</td><td>histone mark</td></tr>
+<tr><td>plate 1</td><td>plate 2, or the reverse</td><td>"split-barcode" reads, with one end from each round. The authors add these to the Pol II data.</td></tr>
+</table>
+<p>For pairing, the authors rewrote the histone and split-read barcodes to the plate-1 (Pol II) barcodes of the same cell. The plate-1 to plate-2 well map is not given in the paper, so it has to come from the plate layout used.</p>
+
+<h3>(4) Pool, filter, DAPI stain and dispense cells into an ICELL8 350v chip (5,184 nanowells). Add SDS + thermolabile proteinase K (37 &deg;C 1 h, 58 &deg;C 1 h), then Triton X-100, then one sci_Ad1 (i5) primer per chip row and one sci_Ad2 (i7) primer per chip column, then KAPA HiFi mix. Gap-fill at 58 &deg;C 5 min and 72 &deg;C 5 min, then run 13 PCR cycles:</h3>
+<pre>
+<align class="long">
+5'- <p5>AATGATACGGCGACCACCGAGATCTACAC</p5>NNNNNNNN<s5>TCGTCGGCAGCGTCTCCACGC</s5>------>
+                                     5'- <s5>TCGTCGGCAGCGTCTCCACGC</s5><cbc>NNNNNNNN</cbc>GCGATCGAGGACGGC<me>AGATGTGTATAAGAGACAG</me>XXXXXX...XXXXXX<me>CTGTCTCTTATACACATCT</me>GAGGCGGAGACGGTG<cbc>NNNNNNNN</cbc><s7>GGACAGGGACAGCCGAGCCCACGAGAC</s7> -3'
+                                     3'- <s5>AGCAGCCGTCGCAGAGGTGCG</s5><cbc>NNNNNNNN</cbc>CGCTAGCTCCTGCCG<me>TCTACACATATTCTCTGTC</me>XXXXXX...XXXXXX<me>GACAGAGAATATGTGTAGA</me>CTCCGCCTCTGCCAC<cbc>NNNNNNNN</cbc><s7>CCTGTCCCTGTCGGCTCGGGTGCTCTG</s7> -5'
+                                                                                                                                                          <------<s7>CCTGTCCCTGTCGGCTCGGGTGCTCTG</s7>NNNNNNNN<p7>TAGAGCATACGGCAGAAGACGAAC</p7> -5'
+</align>
+</pre>
+
+<h3>(5) Final library structure:</h3>
+<pre>
+<align class="long">
+5'- <p5>AATGATACGGCGACCACCGAGATCTACAC</p5>NNNNNNNN<s5>TCGTCGGCAGCGTCTCCACGC</s5><cbc>NNNNNNNN</cbc>GCGATCGAGGACGGC<me>AGATGTGTATAAGAGACAG</me>XXXXXX...XXXXXX<me>CTGTCTCTTATACACATCT</me>GAGGCGGAGACGGTG<cbc>NNNNNNNN</cbc><s7>GGACAGGGACAGCCGAGCCCACGAGAC</s7>NNNNNNNN<p7>ATCTCGTATGCCGTCTTCTGCTTG</p7> -3'
+3'- <p5>TTACTATGCCGCTGGTGGCTCTAGATGTG</p5>NNNNNNNN<s5>AGCAGCCGTCGCAGAGGTGCG</s5><cbc>NNNNNNNN</cbc>CGCTAGCTCCTGCCG<me>TCTACACATATTCTCTGTC</me>XXXXXX...XXXXXX<me>GACAGAGAATATGTGTAGA</me>CTCCGCCTCTGCCAC<cbc>NNNNNNNN</cbc><s7>CCTGTCCCTGTCGGCTCGGGTGCTCTG</s7>NNNNNNNN<p7>TAGAGCATACGGCAGAAGACGAAC</p7> -5'
+             Illumina P5            i5            s5            8 bp                         ME              gDNA              ME                          8 bp              s7                i7          Illumina P7
+                                  ICELL8                   Tn5 s5 barcode                                                                             Tn5 s7 barcode                         ICELL8
+                                  sci_Ad1                                                                                                                                                    sci_Ad2
+</align>
+</pre>
+
+<br>
+
+<h2>Library sequencing:</h2>
+<p>The published runs used an Illumina NextSeq P2 300-cycle flow cell with all four custom primers: Read 1 = 79, Index 1 = 43, Index 2 = 37, Read 2 = 79 cycles. The coordinates are also in <a href="../data/sciCUT-Tag2in1/read_structure.csv">read_structure.csv</a>.</p>
+
+<h3>(1) Add NextSeq_Read1_seq_primer to sequence the first read (bottom strand as template, 79 cycles, these are the gDNA reads):</h3>
+<pre>
+<align class="long">
+                                                                        5'- GAGGACGGC<me>AGATGTGTATAAGAGACAG</me>------------->
+3'- <p5>TTACTATGCCGCTGGTGGCTCTAGATGTG</p5>NNNNNNNN<s5>AGCAGCCGTCGCAGAGGTGCG</s5><cbc>NNNNNNNN</cbc>CGCTAGCTCCTGCCG<me>TCTACACATATTCTCTGTC</me>XXXXXX...XXXXXX<me>GACAGAGAATATGTGTAGA</me>CTCCGCCTCTGCCAC<cbc>NNNNNNNN</cbc><s7>CCTGTCCCTGTCGGCTCGGGTGCTCTG</s7>NNNNNNNN<p7>TAGAGCATACGGCAGAAGACGAAC</p7> -5'
+</align>
+</pre>
+
+<h3>(2) Add NextSeq_Index1_seq_primer to sequence the Tn5 s7 barcode and ICELL8 i7 index (bottom strand as template, 43 cycles: the first 8 bp are the Tn5 s7 barcode, the next 27 are fixed s7 sequence, and the last 8 are the i7 index):</h3>
+<pre>
+<align class="long">
+                                                                                                                                 5'- <me>CATCT</me>GAGGCGGAGACGGTG--------ooooooooooooooooooooooooooo------->
+3'- <p5>TTACTATGCCGCTGGTGGCTCTAGATGTG</p5>NNNNNNNN<s5>AGCAGCCGTCGCAGAGGTGCG</s5><cbc>NNNNNNNN</cbc>CGCTAGCTCCTGCCG<me>TCTACACATATTCTCTGTC</me>XXXXXX...XXXXXX<me>GACAGAGAATATGTGTAGA</me>CTCCGCCTCTGCCAC<cbc>NNNNNNNN</cbc><s7>CCTGTCCCTGTCGGCTCGGGTGCTCTG</s7>NNNNNNNN<p7>TAGAGCATACGGCAGAAGACGAAC</p7> -5'
+</align>
+</pre>
+
+<h3>(3) Cluster regeneration, then add NextSeq_Index2_seq_primer to sequence the Tn5 s5 barcode and ICELL8 i5 index (top strand as template, 37 cycles: the first 8 bp are the Tn5 s5 barcode, the next 21 are fixed s5 sequence, and the last 8 are the i5 index):</h3>
+<pre>
+<align class="long">
+5'- <p5>AATGATACGGCGACCACCGAGATCTACAC</p5>NNNNNNNN<s5>TCGTCGGCAGCGTCTCCACGC</s5><cbc>NNNNNNNN</cbc>GCGATCGAGGACGGC<me>AGATGTGTATAAGAGACAG</me>XXXXXX...XXXXXX<me>CTGTCTCTTATACACATCT</me>GAGGCGGAGACGGTG<cbc>NNNNNNNN</cbc><s7>GGACAGGGACAGCCGAGCCCACGAGAC</s7>NNNNNNNN<p7>ATCTCGTATGCCGTCTTCTGCTTG</p7> -3'
+                                 <-------ooooooooooooooooooooo--------CGCTAGCTCCTGCCG<me>TCTAC</me> -5'
+</align>
+</pre>
+
+<h3>(4) Add NextSeq_Read2_seq_primer to sequence the second read (top strand as template, 79 cycles, these are the gDNA reads):</h3>
+<pre>
+<align class="long">
+5'- <p5>AATGATACGGCGACCACCGAGATCTACAC</p5>NNNNNNNN<s5>TCGTCGGCAGCGTCTCCACGC</s5><cbc>NNNNNNNN</cbc>GCGATCGAGGACGGC<me>AGATGTGTATAAGAGACAG</me>XXXXXX...XXXXXX<me>CTGTCTCTTATACACATCT</me>GAGGCGGAGACGGTG<cbc>NNNNNNNN</cbc><s7>GGACAGGGACAGCCGAGCCCACGAGAC</s7>NNNNNNNN<p7>ATCTCGTATGCCGTCTTCTGCTTG</p7> -3'
+                                                                                                         <-------------<me>GACAGAGAATATGTGTAGA</me>CTCCGCCTCTG -5'
+</align>
+</pre>
+
+<h2>Barcode positions in the FASTQ files</h2>
+<table>
+<tr><th>Read</th><th>Cycles</th><th>Content (1-based positions)</th></tr>
+<tr><td>Read 1</td><td>79</td><td>gDNA</td></tr>
+<tr><td>Index 1</td><td>43</td><td>1-8: Tn5 s7 barcode, as the reverse complement of the barcode in the <seq>P7_s7</seq> oligo; 9-35: <seq>GGACAGGGACAGCCGAGCCCACGAGAC</seq>; 36-43: i7 index, as the reverse complement of the barcode in <seq>sci_Ad2</seq></td></tr>
+<tr><td>Index 2</td><td>37</td><td>1-8: reverse complement of the Tn5 s5 barcode in the oligo; 9-29: <seq>GCGTGGAGACGCTGCCGACGA</seq>; 30-37: reverse complement of the <seq>sci_Ad1</seq> i5 index. This is what a reverse-complement (Workflow B) instrument such as the NextSeq 2000 produces. On a forward-strand instrument the whole read is reverse complemented: i5, then s5, then the Tn5 s5 barcode.</td></tr>
+<tr><td>Read 2</td><td>79</td><td>gDNA</td></tr>
+</table>
+<p>The authors demultiplex with <a href="https://github.com/mfitzgib/sciCTextract" target="_blank">sciCTextract</a>. It takes Index 1 positions 1-8 as the Tn5 s7 barcode and 36-43 as i7. It then reverse complements Index 2 (unless <code>--forward-mode</code> is set) and takes positions 1-8 as i5 and 30-37 as the Tn5 s5 barcode. It allows one mismatch per barcode. In its barcode tables, s5 and i5 are given as in the oligos, and s7 and i7 as reverse complements of the oligos. The cell barcodes in the authors' output files are the 32-nt concatenation i7 + i5 + Tn5 s7 + Tn5 s5.</p>
+
+<br>
+
+</body>
+</html>
